@@ -8,4 +8,4 @@ FROM node:18-alpine
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app .
 EXPOSE 3000
-CMD [ "node", "src/app.js" ]
+CMD [ "node", "src/server.js" ]
