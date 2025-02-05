@@ -1,0 +1,36 @@
+services:
+  php-service:
+    build: ./php-service
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    env_file:
+      - ./php-service/.env
+
+  express-service:
+    build: ./express-service
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    env_file:
+      - ./express-service/.env
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3001:3000"
+    depends_on:
+      - php-service
+      - express-service
+
+  db:
+    image: mysql:8
+    volumes:
+      - db-data:/var/lib/mysql
+    env_file:
+      - ./db/.env
+
+volumes:
+  db-data:
