@@ -1,0 +1,51 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Déclenche le workflow sur des pushes vers la branche principale
+
+jobs:
+  # Job pour les tests
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout du code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Installation des dépendances de test pour Express
+      - name: Set up Node.js for testing
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # La version de Node.js à utiliser
+
+      - name: Install dependencies
+        run: |
+          cd express-service
+          npm install
+
+      # Exécution des tests Express
+      - name: Run Express tests
+        run: |
+          cd express-service
+          npm test
+  # Job pour la construction des images Docker
+  build-and-push-express-service:
+    name: Construire et Pousser l’image Docker du service Express
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v3
+
+      - name: Se connecter à Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Construire l’image Docker du service Express
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/express-service:latest ./express-service
+
+      - name: Pousser l’image du service Express sur Docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/express-service:latest
